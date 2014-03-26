@@ -23,8 +23,8 @@ j exit
 
 #
 #  Parameters:
-#    $a0 --> x oordinate
-#    $a1 --> y oordinate
+#    $a0 --> x coordinate
+#    $a1 --> y coordinate
 #    $a2 --> color hex code
 #
 drawPixel:
