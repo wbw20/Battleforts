@@ -99,5 +99,5 @@ drawFilledRectangle:
     jr $ra # return
 
 exit:
-  li $v0,10
+  li $v0, 10
   syscall
