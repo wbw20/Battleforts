@@ -72,17 +72,18 @@ drawFilledRectangle:
   lw $s0, 0($sp)
   lw $s1, 4($sp)
   lw $s2, 8($sp)
-  lw $s3, 12($sp)
+
   lw $a2, 16($sp)
 
   row:
     # at the end of this row?
     bltz $s2, dfr_return
+    lw $s3, 12($sp)
     add $a0, $s0, $s2 # x coordinate
 
     column:
       # at the end of this column?
-      bltz $s3, row
+      bltz $s3, end_row
       add $a1, $s1, $s3 # y coordinate
 
       jal drawPixel
@@ -90,6 +91,7 @@ drawFilledRectangle:
       addi $s3, $s3, -1
       j column
 
+  end_row:
     addi $s2, $s2, -1
     j row
 
