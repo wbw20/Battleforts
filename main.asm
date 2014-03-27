@@ -61,21 +61,40 @@ drawPixel:
 
 #
 #  Parameters:
-#    $a0 --> x coordinate
-#    $a1 --> y coordinate
-#    $a2 --> width
-#    $a3 --> height
-#    $a4 --> color hex code
+#    0($sp) --> x coordinate
+#    4($sp) --> y coordinate
+#    8($sp) --> width
+#    12($sp) --> height
+#    16($sp) --> color hex code
 #
 drawFilledRectangle:
 
-  lw $t0, 0($sp)
-  lw $t1, 4($sp)
-  lw $t2, 8($sp)
-  lw $t3, 12($sp)
-  lw $t4, 16($sp)
+  lw $s0, 0($sp)
+  lw $s1, 4($sp)
+  lw $s2, 8($sp)
+  lw $s3, 12($sp)
+  lw $a2, 16($sp)
 
-  jr $ra # return
+  row:
+    # at the end of this row?
+    bltz $s2, dfr_return
+    add $a0, $s0, $s2 # x coordinate
+
+    column:
+      # at the end of this column?
+      bltz $s3, row
+      add $a1, $s1, $s3 # y coordinate
+
+      jal drawPixel
+
+      addi $s3, $s3, -1
+      j column
+
+    addi $s2, $s2, -1
+    j row
+
+  dfr_return:
+    jr $ra # return
 
 exit:
   li $v0,10
