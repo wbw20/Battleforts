@@ -1,0 +1,11 @@
+{
+  "name": "Battleforts",
+  "dependencies": {
+    "grunt": "latest",
+    "grunt-cli": "latest"
+  },
+  "devDependencies": {
+    "grunt-includes": "latest",
+    "grunt-contrib-watch": "latest"
+  }
+}
