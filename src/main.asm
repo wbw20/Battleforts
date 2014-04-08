@@ -16,15 +16,15 @@ display:        .space 0x4000
 
 li $a0, 100
 li $a1, 100
-li $a2, 100
-li $a3, 100
+li $a2, 20
+li $a3, 20
 addi $sp, $sp, -20
 sw $a0, 0($sp)
 sw $a1, 4($sp)
 sw $a2, 8($sp)
 sw $a3, 12($sp)
-lw $t0, green
-sw $t0, 16($sp)
+#lw $t0, green
+#sw $t0, 16($sp)
 jal drawFilledRectangle
 
 j exit
@@ -73,7 +73,13 @@ drawFilledRectangle:
   lw $s1, 4($sp)
   lw $s2, 8($sp)
 
-  lw $a2, 16($sp)
+  #lw $a2, 16($sp)
+  la $t3, list  # address of first element in array
+  li $t4, 0 # array index
+  #sll $t2
+  
+  lw $a2, 0($t3)
+
 
   row:
     # at the end of this row?
@@ -85,8 +91,13 @@ drawFilledRectangle:
       # at the end of this column?
       bltz $s3, end_row
       add $a1, $s1, $s3 # y coordinate
+      
+      sll $t2, $t4, 2 # get index offset
+      add $t1, $t2, $t3 # add offset to address
+      add $a2, $t1, $zero
 
       jal drawPixel
+      addi $t4, $t4, 1
 
       addi $s3, $s3, -1
       j column

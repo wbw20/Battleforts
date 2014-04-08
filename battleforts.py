@@ -5,6 +5,7 @@ import subprocess
 
 def prepare_battleforts():
     print "Preparing battleforts..."
+    print "test"
 
     pixels = []
     bitmap_files = glob("img/bitmap/*.bmp")
