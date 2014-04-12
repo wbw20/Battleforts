@@ -1,6 +1,5 @@
 .data
 
-list:           .word 0xff0000, 0xff0000, 0xff0000
 # colors
 red:            .word 0xff0000
 green:          .word 0x00ff00
@@ -17,8 +16,8 @@ display:        .space 0x4000
 
 li $t0, 100
 li $t1, 100
-li $t2, 100
-li $t3, 100
+li $t2, 500
+li $t3, 500
 la $t4, list
 addi $sp, $sp, -20
 sw $t0, 0($sp)
