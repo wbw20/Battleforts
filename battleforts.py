@@ -5,9 +5,10 @@ import subprocess
 
 def prepare_battleforts():
     print "Preparing battleforts..."
+    print "test"
 
     pixels = []
-    bitmap_files = glob("img/bitmap/*.bmp")
+    bitmap_files = glob("img/bitmap/castle.bmp")
     bitmap_files = [ os.path.abspath(rel_path) for rel_path in bitmap_files ]
     print "Converting bitmaps to pixel array..."
     num_bitmap_files = len(bitmap_files)
