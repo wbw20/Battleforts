@@ -11,7 +11,7 @@ def convert_bitmap(filepath):
     # currently reducing to 1/10 number of original pixels
     for x in xrange(0, width, 10):
         for y in xrange(0, height, 10):
-            pixels.append(rgb_to_hex(im.getpixel((x,y))))
+            pixels.append('0x{}'.format(rgb_to_hex(im.getpixel((x,y)))))
 
     return pixels
 

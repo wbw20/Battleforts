@@ -14,18 +14,19 @@ display:        .space 0x4000
 
 .text
 
-li $a0, 100
-li $a1, 100
-li $a2, 100
-li $a3, 100
+li $t0, 100
+li $t1, 100
+li $t2, 500
+li $t3, 500
+la $t4, list
 addi $sp, $sp, -20
-sw $a0, 0($sp)
-sw $a1, 4($sp)
-sw $a2, 8($sp)
-sw $a3, 12($sp)
-lw $t0, green
-sw $t0, 16($sp)
-jal drawFilledRectangle
+sw $t0, 0($sp)
+sw $t1, 4($sp)
+sw $t2, 8($sp)
+sw $t3, 12($sp)
+sw $t4, 16($sp)
+
+jal drawBitmap
 
 j exit
 
@@ -75,28 +76,73 @@ drawFilledRectangle:
 
   lw $a2, 16($sp)
 
-  row:
+  dfr_row:
     # at the end of this row?
     bltz $s2, dfr_return
     lw $s3, 12($sp)
     add $a0, $s0, $s2 # x coordinate
 
-    column:
+    dfr_column:
       # at the end of this column?
-      bltz $s3, end_row
+      bltz $s3, dfr_end_row
       add $a1, $s1, $s3 # y coordinate
 
       jal drawPixel
 
       addi $s3, $s3, -1
-      j column
+      j dfr_column
 
-  end_row:
+  dfr_end_row:
     addi $s2, $s2, -1
-    j row
+    j dfr_row
 
   dfr_return:
     jr $ra # return
+
+
+#
+#  Parameters:
+#    0($sp) --> x coordinate
+#    4($sp) --> y coordinate
+#    8($sp) --> width
+#   12($sp) --> height
+#   16($sp) --> address of bitmap pixel colors
+#
+drawBitmap:
+
+  lw $s0, 0($sp)
+  lw $s1, 4($sp)
+  lw $s2, 8($sp)
+  lw $s3, 12($sp)
+  lw $s4, 16($sp)
+
+  db_row:
+    # at the end of this row?
+    bltz $s2, dfr_return
+    lw $s3, 12($sp)
+    add $a0, $s0, $s2 # x coordinate
+
+    db_column:
+      # at the end of this column?
+      bltz $s3, db_end_row
+      add $a1, $s1, $s3 # y coordinate
+
+      lw $a2, 0($s4) # load color
+
+      jal drawPixel
+
+      addi $s4, $s4, 4 # increment color address
+
+      addi $s3, $s3, -1
+      j db_column
+
+  db_end_row:
+    addi $s2, $s2, -1
+    j db_row
+
+  db_return:
+    jr $ra # return
+
 
 exit:
   li $v0, 10
