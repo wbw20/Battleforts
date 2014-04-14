@@ -116,6 +116,9 @@ drawBitmap:
   lw $s3, 12($sp)
   lw $s4, 16($sp)
 
+  li $s5, 0
+  li $s6, 0
+
   db_row:
     # at the end of this row?
     bltz $s2, dfr_return
