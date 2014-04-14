@@ -39,8 +39,7 @@ def prepare_battleforts():
         for bmp_name, pixels in bmp_pixels.items():
             f.write("{}: .word {}\n".format(bmp_name, ",".join(pixels)))
 
-    print "All ready, launching MARS simulator!"
-    subprocess.Popen(["java", "-jar", "Mars4_4.jar"])
+    print "done"
 
 
 if __name__ == '__main__':
