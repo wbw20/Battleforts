@@ -5,15 +5,14 @@ import subprocess
 
 def prepare_battleforts():
     print "Preparing battleforts..."
-    print "test"
 
     bmp_pixels = {}
-    bitmap_files = glob("img/bitmap/*.bmp")
+    bitmap_files = glob("img/bitmap/*.png")
     bitmap_files = [ os.path.abspath(rel_path) for rel_path in bitmap_files ]
     print "Converting bitmaps to pixel array..."
     num_bitmap_files = len(bitmap_files)
     for i in range(num_bitmap_files):
-        print "Converting bmp {}/{}".format(i+1, num_bitmap_files)
+        print "Converting images: {}/{}".format(i+1, num_bitmap_files)
         file_name = os.path.splitext(os.path.basename(bitmap_files[i]))[0]
         bmp_pixels[file_name] = convert_bitmap(bitmap_files[i])
 
