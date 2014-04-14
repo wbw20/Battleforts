@@ -121,9 +121,9 @@ drawBitmap:
 
   db_row:
     # at the end of this row?
-    bltz $s2, dfr_return
+    beq $s2, $s5 dfr_return
     lw $s3, 12($sp)
-    add $a0, $s0, $s2 # x coordinate
+    add $a0, $s0, $s5 # x coordinate
 
     db_column:
       # at the end of this column?
@@ -140,7 +140,7 @@ drawBitmap:
       j db_column
 
   db_end_row:
-    addi $s2, $s2, -1
+    addi $s5, $s5, 1
     j db_row
 
   db_return:
