@@ -119,9 +119,12 @@ drawBitmap:
   li $s5, 0
   li $s6, 0
 
+  # jal paints over $ra
+  move $s7, $ra
+
   db_row:
     # at the end of this row?
-    beq $s2, $s5 dfr_return
+    beq $s2, $s5 db_return
     lw $s3, 12($sp)
     add $a0, $s0, $s5 # x coordinate
 
@@ -144,7 +147,7 @@ drawBitmap:
     j db_row
 
   db_return:
-    jr $ra # return
+    jr $s7 # return
 
 
 exit:
