@@ -17,7 +17,7 @@ display:        .space 0x4000
 li $t0, 0
 li $t1, 0
 li $t2, 42
-li $t3, 63
+li $t3, 64
 la $t4, MongolWalk1
 addi $sp, $sp, -20
 sw $t0, 0($sp)
