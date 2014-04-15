@@ -116,8 +116,8 @@ drawBitmap:
   lw $s3, 12($sp)
   lw $s4, 16($sp)
 
+  # x counter
   li $s5, 0
-  li $s6, 0
 
   # jal paints over $ra
   move $s7, $ra
@@ -125,13 +125,17 @@ drawBitmap:
   db_row:
     # at the end of this row?
     beq $s2, $s5 db_return
+
+    # y counter
+    li $s6, 0
+
     lw $s3, 12($sp)
     add $a0, $s0, $s5 # x coordinate
 
     db_column:
       # at the end of this column?
-      bltz $s3, db_end_row
-      add $a1, $s1, $s3 # y coordinate
+      beq $s3, $s6, db_end_row
+      add $a1, $s1, $s6 # y coordinate
 
       lw $a2, 0($s4) # load color
 
@@ -139,7 +143,7 @@ drawBitmap:
 
       addi $s4, $s4, 4 # increment color address
 
-      addi $s3, $s3, -1
+      addi $s6, $s6, 1
       j db_column
 
   db_end_row:
