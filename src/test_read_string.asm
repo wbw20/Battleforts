@@ -1,18 +1,38 @@
 .data
-str:        .ascii "7"
+str:        .ascii "8f"
 error_str:  .asciiz "ERROR"
 
 .text
 
-la $t0, str
-lb $t1, 0($t0)
-move $a0, $t1
-jal charToDecValue
+la $a0, str
+jal getColorComponentValue
 move $a0, $v0
 jal printInt
 j exit
 
+# $a0 = address of first charcter
+getColorComponentValue:
+  la $s0, ($ra)		# original return address
+  li $s1, 0       	# return value = 0
+  la $s2, ($a0)		# character address
+  lb $t3, 0($s2)	# character
+  move $a0, $t3
+  jal charToDecValue
+  move $t4, $v0
+  sll $t4, $t4, 4
+  add $s1, $s1, $t4	# return value += val(str[0]) * 16 
+  
+  lb $t3, 1($s2)
+  move $a0, $t3
+  jal charToDecValue
+  move $t4, $v0
+  add $s1, $s1, $t4	# return value += val(str[1])
+  move $v0, $s1
+  jr $s0
+
+
 # $a0 = character
+# returns int
 charToDecValue:
   la $t3, 0($ra)	# original return address
   li $t2, 0	# sum = 0
