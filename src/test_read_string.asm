@@ -1,14 +1,36 @@
 .data
-str:        .ascii "8f"
+str:        .ascii "0fff00"
 error_str:  .asciiz "ERROR"
 
 .text
 
 la $a0, str
-jal getColorComponentValue
+jal getColorValue
 move $a0, $v0
 jal printInt
 j exit
+
+# $a0 = address of string
+getColorValue:
+  la $s6, ($ra)   # return to main
+  move $s4, $a0
+  li $s7, 0       # return value
+  move $a0, $s4
+  jal getColorComponentValue
+  move $t0, $v0
+  sll $t0, $t0, 8
+  sll $t0, $t0, 8
+  add $s7, $s7, $t0
+  la $a0, 2($s4)
+  jal getColorComponentValue
+  move $t0, $v0
+  sll $t0, $t0, 8
+  add $s7, $s7, $t0
+  la $a0, 4($s4)
+  jal getColorComponentValue
+  add $s7, $s7, $v0
+  move $v0, $s7
+  jr $s6
 
 # $a0 = address of first charcter
 getColorComponentValue:
