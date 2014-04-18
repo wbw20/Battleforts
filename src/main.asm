@@ -14,21 +14,148 @@ display:        .space 0x4000
 
 .text
 
-li $t0, 0
-li $t1, 0
-li $t2, 42
-li $t3, 64
-la $t4, MongolWalk1
-addi $sp, $sp, -20
-sw $t0, 0($sp)
-sw $t1, 4($sp)
-sw $t2, 8($sp)
-sw $t3, 12($sp)
-sw $t4, 16($sp)
+main_init:
+	
+	#li $t0, 0 #0
+	#li $t1, 0 #0
+	#li $t2, 42 
+	#li $t3, 64 
+	#la $t4, MongolWalk1
+	addi $sp, $sp, -20
+	#sw $t0, 0($sp)
+	#sw $t1, 4($sp)
+	#sw $t2, 8($sp)
+	#sw $t3, 12($sp)
+	#sw $t4, 16($sp)
 
-jal drawBitmap
+main_waitLoop:
+	
+	# Wait for the player to press a key to begin the game
+	jal sleep			
+	nop
+	lw $t0, 0xFFFF0000			# Retrieve transmitter control ready bit
+	blez $t0, main_waitLoop		# Check if a key was pressed
+	nop
 
-j exit
+
+main_draw:
+	
+	jal getPlayer
+	nop
+	or $t6, $zero, $v0	# Backup direction from keyboard
+
+
+main_drawLeft:
+	bne $t6, 0x01000000, main_drawRight
+	nop
+	b paladinWalk
+	nop
+	
+	
+main_drawRight:
+	bne $t6, 0x02000000, main_exit
+	nop
+	b mongolWalk
+	nop
+	
+
+main_exit:
+	bne $t6, 0x03000000, main_draw
+	nop
+    li $v0, 10
+    syscall
+
+mongolWalk:
+	li $t0, 700 
+	li $t1, 310 
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	
+	
+	li $t2, 42 
+	li $t3, 64 
+	la $t4, MongolWalk1
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	li $t2, 44 
+	li $t3, 62 
+	la $t4, MongolWalk2
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	li $t2, 43 
+	li $t3, 62 
+	la $t4, MongolWalk3
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	li $t2, 43 
+	li $t3, 62 
+	la $t4, MongolWalk4
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	j main_draw
+	nop
+
+paladinWalk:
+	li $t0, -250 
+	li $t1, 285 
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	
+	li $t2, 50 
+	li $t3, 84 
+	la $t4, PaladinWalk1
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	li $t2, 52 
+	li $t3, 86 
+	la $t4, PaladinWalk2
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	li $t2, 58 
+	li $t3, 85 
+	la $t4, PaladinWalk3
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	li $t2, 63 
+	li $t3, 80 
+	la $t4, PaladinWalk4
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	nop
+	
+	j main_draw
+	nop
+
 
 #
 #  Parameters:
@@ -154,6 +281,46 @@ drawBitmap:
     jr $s7 # return
 
 
-exit:
-  li $v0, 10
-  syscall
+#
+#  Parameters:
+#    none
+#
+sleep:
+	ori $v0, $zero, 32		# Syscall sleep
+	ori $a0, $zero, 60		# For this many miliseconds
+	syscall
+	jr $ra				# Return
+	nop
+
+#
+#  Parameters:
+#    none
+#  Returns:
+#	 v0 = player(side) OR exit program
+#
+getPlayer:
+	lw $t0, 0xFFFF0004		# Load input value
+
+getPlayer_left:
+	bne $t0, 102, getPlayer_right
+	nop
+	ori $v0, $zero, 0x01000000	# left
+	j getPlayer_done
+	nop
+getPlayer_right:
+	bne $t0, 106, getPlayer_exit
+	nop
+	ori $v0, $zero, 0x02000000	# right
+	j getPlayer_done
+	nop
+getPlayer_exit:
+	bne $t0, 120, getPlayer_none
+	nop
+	ori $v0, $zero, 0x03000000	# exit
+	j getPlayer_done
+	nop
+getPlayer_none:
+						# Do nothing
+getPlayer_done:
+	jr $ra				# Return
+	nop	
