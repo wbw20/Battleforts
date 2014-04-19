@@ -7,6 +7,10 @@ Project in MIPS instruction set.
 Keyboard Input
 ==============
 
-f --> left side (paladin), 
-j --> right side (mongol), 
-x --> exit program
+`p` --> play
+
+`f` --> generate left side unit (paladin)
+ 
+`j` --> generate right side unit (mongol)
+ 
+`x` --> exit program
