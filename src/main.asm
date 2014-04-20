@@ -14,11 +14,13 @@ display:        .space 0x4000
 
 .text
 
+
+
 li $t0, 0
 li $t1, 0
-li $t2, 42
-li $t3, 64
-la $t4, MongolWalk1
+li $t2, 52
+li $t3, 85
+la $t4, MongolWalk2
 addi $sp, $sp, -20
 sw $t0, 0($sp)
 sw $t1, 4($sp)
