@@ -1,16 +1,51 @@
 .data
-str:        .ascii "0fff00"
+str:        .ascii "0fff00000fff"
+stringLength: .word 12
 error_str:  .asciiz "ERROR"
+new_line:   .ascii "\n"
 
 .text
 
+lw $a0, stringLength     # allocate heap memory for string
+li $v0, 9 # syscall 9 (sbrk)
+syscall
 la $a0, str
-jal getColorValue
+move $a1, $v0
+jal parseString
 move $a0, $v0
 jal printInt
+li $v0, 4
+la $a0, new_line
+syscall
+
 j exit
 
-# $a0 = address of string
+# $a0 = address of full string
+# $a1 = heap memory address
+# returns heap memory address
+parseString:
+  move $t7, $a1       # beginning of allocated memory
+  lw $t8, stringLength
+  move $t9, $a0
+  subu $sp, $sp, 8
+  sw $ra, ($sp)        # store return address
+  sw $a1, 4($sp)
+
+  loopThroughString:
+    move $a0, $t9
+    jal getColorValue
+    sw $v0, ($t7)
+    addi $t7, $t7, 4
+    subu $t8, $t8, 6
+    addi $t9, $t9, 6
+    bnez $t8, loopThroughString
+
+  lw $ra, ($sp)
+  lw $v0, 4($sp)
+  addu $sp, $sp, 8
+  jr $ra
+
+# $a0 = address of initial character in substring
 getColorValue:
   li $v0, 0           # return value
   subu $sp, $sp, 12
