@@ -12,7 +12,7 @@ syscall
 la $a0, str
 move $a1, $v0
 jal parseString
-move $a0, $v0
+lw $a0, ($v0)
 jal printInt
 li $v0, 4
 la $a0, new_line
