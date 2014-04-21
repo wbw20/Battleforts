@@ -1,1 +1,2 @@
 0fff00,000fff,fff000
+ffffff,0c1fff,00ff00

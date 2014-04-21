@@ -1,13 +1,15 @@
 .data
 fnf_err_str:    .ascii  "The file was not found: "
-value_err_str:  .ascii "ERROR"
-file:    .asciiz    "src/bmp_colors.txt"
-cont:    .ascii  "file contents: "
-buffer: .space 1024
-test_str:        .ascii "0fff00,000fff,fff000"	# first value 1048320
-new_line:   .ascii "\n"
-fileLength: .word 18
-imageIndices: .word 0
+value_err_str:  .ascii  "ERROR"
+file:           .asciiz "src/bmp_colors.txt"
+cont:           .ascii  "file contents:\n"
+buffer:         .space  1024
+test_str:       .ascii  "0fff00,000fff,fff000"
+new_line:       .ascii  "\n"
+colorCount:     .word   6
+colorsLength:   .word   36    # colorCount * 6 (length of hex-value substring)
+numberOfImages: .word   2
+imageIndices:   .space  8    # number of images * 4 (word aligned)
 
 
 .text
@@ -33,32 +35,32 @@ j exit
 readPixelsToBuffer:
   # Open File
   open:
-      li    $v0, 13        # Open File Syscall
-      la    $a0, file    # Load File Name
-      li    $a1, 0        # Read-only Flag
-      li    $a2, 0        # (ignored)
-      syscall
-      move    $s6, $v0    # Save File Descriptor
-      blt    $v0, 0, fnf_error    # Goto Error
+    li    $v0, 13        # Open File Syscall
+    la    $a0, file      # Load File Name
+    li    $a1, 0         # Read-only Flag
+    li    $a2, 0         # (ignored)
+    syscall
+    move  $s6, $v0       # Save File Descriptor
+    blt   $v0, 0, fnf_error
    
   # Read Data
   read:
-      li    $v0, 14        # Read File Syscall
-      move    $a0, $s6    # Load File Descriptor
-      la    $a1, buffer    # Load Buffer Address
-      li    $a2, 1024    # Buffer Size
-      syscall
+    li    $v0, 14        # Read File Syscall
+    move  $a0, $s6       # Load File Descriptor
+    la    $a1, buffer    # Load Buffer Address
+    li    $a2, 1024      # Buffer Size
+    syscall
    
   print:
-      li    $v0, 4        # Print String Syscall
-      la    $a0, cont    # Load Contents String
-      syscall
+    li    $v0, 4         # Print String Syscall
+    la    $a0, cont      # Load Contents String
+    syscall
    
   # Close File
   close:
-      li    $v0, 16        # Close File Syscall
-      move    $a0, $s6    # Load File Descriptor
-      syscall
+    li    $v0, 16        # Close File Syscall
+    move  $a0, $s6       # Load File Descriptor
+    syscall
 
   jr $ra
 
@@ -67,26 +69,54 @@ readPixelsToBuffer:
 # returns heap memory address
 parseString:
   move $t7, $a1       # beginning of allocated memory
-  lw $t8, fileLength
+  lw $t8, colorsLength    # i = colorsLength
   move $t9, $a0
   subu $sp, $sp, 8
   sw $ra, ($sp)        # store return address
   sw $a1, 4($sp)
 
-  loopThroughString:
+  loopThroughString:        # while i > 0
     move $a0, $t9
     jal getColorValue
     sw $v0, ($t7)
     addi $t7, $t7, 4
-    subu $t8, $t8, 6
-    addi $t9, $t9, 7
-    #beq $t9, '\n', addToImageIndices
+    subu $t8, $t8, 6        # decrement i
+    addi $t9, $t9, 6
+    lb $t4, ($t9)
+    beq $t4, '\n', addToImageIndices    # comma or \n?
+    
+    readNextPixel:
+    addi $t9, $t9, 1                 # go to next hex-value regardless of separating char
     bnez $t8, loopThroughString
+    j parse_return
 
-  lw $ra, ($sp)
-  lw $v0, 4($sp)
-  addu $sp, $sp, 8
-  jr $ra
+    addToImageIndices:
+      lw $t0, colorsLength
+      subu $t0, $t0, $t8        # colorsLength - i
+      li $t2, 6
+      divu $t0, $t2
+      mflo $t0
+      li $t2, 4
+      multu $t0, $t2
+      mflo $t0
+
+      la $t1, imageIndices
+      loopThroughArray:
+        lw $t2, ($t1)
+        beq $t2, 0, insertNewIndex
+        addi $t1, $t1, 4
+        j loopThroughArray
+
+      insertNewIndex:
+        sw $t0, ($t1)
+  
+      j readNextPixel
+
+  parse_return:
+    lw $ra, ($sp)
+    lw $v0, 4($sp)
+    addu $sp, $sp, 8
+    jr $ra
 
 # $a0 = address of initial character in substring
 getColorValue:
