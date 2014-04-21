@@ -102,8 +102,8 @@ mongolWalk:
   sw $t0, 0($sp)
   sw $t1, 4($sp)
 
-  li $t2, 42 
-  li $t3, 64 
+  li $t2, 86
+  li $t3, 107
   la $t4, MongolWalk1
   sw $t2, 8($sp)
   sw $t3, 12($sp)
@@ -111,8 +111,8 @@ mongolWalk:
   jal drawBitmap
   nop
 
-  li $t2, 44 
-  li $t3, 62 
+  li $t2, 86
+  li $t3, 107
   la $t4, MongolWalk2
   sw $t2, 8($sp)
   sw $t3, 12($sp)
@@ -120,8 +120,8 @@ mongolWalk:
   jal drawBitmap
   nop
 
-  li $t2, 43 
-  li $t3, 62 
+  li $t2, 86
+  li $t3, 107
   la $t4, MongolWalk3
   sw $t2, 8($sp)
   sw $t3, 12($sp)
@@ -129,8 +129,8 @@ mongolWalk:
   jal drawBitmap
   nop
 
-  li $t2, 43 
-  li $t3, 62 
+  li $t2, 86
+  li $t3, 107
   la $t4, MongolWalk4
   sw $t2, 8($sp)
   sw $t3, 12($sp)
@@ -148,8 +148,8 @@ paladinWalk:
   sw $t0, 0($sp)
   sw $t1, 4($sp)
 
-  li $t2, 50 
-  li $t3, 84 
+  li $t2, 86
+  li $t3, 107
   la $t4, PaladinWalk1
   sw $t2, 8($sp)
   sw $t3, 12($sp)
@@ -157,8 +157,8 @@ paladinWalk:
   jal drawBitmap
   nop
 
-  li $t2, 52 
-  li $t3, 86 
+  li $t2, 86
+  li $t3, 107
   la $t4, PaladinWalk2
   sw $t2, 8($sp)
   sw $t3, 12($sp)
@@ -166,8 +166,8 @@ paladinWalk:
   jal drawBitmap
   nop
 
-  li $t2, 58 
-  li $t3, 85 
+  li $t2, 86
+  li $t3, 107
   la $t4, PaladinWalk3
   sw $t2, 8($sp)
   sw $t3, 12($sp)
@@ -175,8 +175,8 @@ paladinWalk:
   jal drawBitmap
   nop
 
-  li $t2, 63 
-  li $t3, 80 
+  li $t2, 86
+  li $t3, 107
   la $t4, PaladinWalk4
   sw $t2, 8($sp)
   sw $t3, 12($sp)
