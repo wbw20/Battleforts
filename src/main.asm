@@ -10,185 +10,181 @@ display:        .space 0x4000
 .text
 
 main_menu:
-	
-	li $t0, 80 
-	li $t1, 0
-	li $t2, 327 
-	li $t3, 95 
-	la $t4, Battleforts #Battleforts
-	addi $sp, $sp, -20
-	sw $t0, 0($sp)
-	sw $t1, 4($sp)
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
+  li $t0, 80 
+  li $t1, 0
+  li $t2, 327 
+  li $t3, 95 
+  la $t4, Battleforts #Battleforts
+  addi $sp, $sp, -20
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
 
 
 main_waitLoop:
-	
-	# Wait for the player to press a key to begin the game
-	jal sleep			
-	nop
-	lw $t0, 0xFFFF0000			# Retrieve transmitter control ready bit
-	blez $t0, main_waitLoop		# Check if a key was pressed
-	nop
+  # Wait for the player to press a key to begin the game
+  jal sleep      
+  nop
+  lw $t0, 0xFFFF0000      # Retrieve transmitter control ready bit
+  blez $t0, main_waitLoop    # Check if a key was pressed
+  nop
 
 
 main_play:
-	jal getInput
-	nop
-	or $t6, $zero, $v0	# Backup direction from keyboard
-	
-	beq $t6, 0x04000000, main_exit
-	nop
-	
-	bne $t6, 0x01000000, main_play
-	nop
-	
-	
+  jal getInput
+  nop
+  or $t6, $zero, $v0  # Backup direction from keyboard
+
+  beq $t6, 0x04000000, main_exit
+  nop
+
+  bne $t6, 0x01000000, main_play
+  nop
+
+
 main_instructions:
-	li $t0, 50
-	li $t1, 0
-	li $t2, 393 
-	li $t3, 104 
-	la $t4, Instructions #Battleforts
-	addi $sp, $sp, -20
-	sw $t0, 0($sp)
-	sw $t1, 4($sp)
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
+  li $t0, 50
+  li $t1, 0
+  li $t2, 393 
+  li $t3, 104 
+  la $t4, Instructions #Battleforts
+  addi $sp, $sp, -20
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
 
 
 main_generateUnits:
-	
-	jal getInput
-	nop
-	or $t6, $zero, $v0	# Backup direction from keyboard
-	
-	beq $t6, 0x04000000, main_exit
-	nop
+  jal getInput
+  nop
+  or $t6, $zero, $v0  # Backup direction from keyboard
+
+  beq $t6, 0x04000000, main_exit
+  nop
 
 
 main_generateUnitsLeft:
-	bne $t6, 0x02000000, main_generateUnitsRight
-	nop
-	b paladinWalk
-	nop
-	
-	
-main_generateUnitsRight:
-	bne $t6, 0x03000000, main_done
-	nop
-	b mongolWalk
-	nop
+  bne $t6, 0x02000000, main_generateUnitsRight
+  nop
+  b paladinWalk
+  nop
 
-	
+
+main_generateUnitsRight:
+  bne $t6, 0x03000000, main_done
+  nop
+  b mongolWalk
+  nop
+
+
 main_done:
-	b main_generateUnits
-	
+  b main_generateUnits
+
 
 main_exit:
-    li $v0, 10
-    syscall
+  li $v0, 10
+  syscall
 
 
 
 mongolWalk:
-	li $t0, 450 
-	li $t1, 175 
-	sw $t0, 0($sp)
-	sw $t1, 4($sp)
-	
-	
-	li $t2, 42 
-	li $t3, 64 
-	la $t4, MongolWalk1
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	li $t2, 44 
-	li $t3, 62 
-	la $t4, MongolWalk2
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	li $t2, 43 
-	li $t3, 62 
-	la $t4, MongolWalk3
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	li $t2, 43 
-	li $t3, 62 
-	la $t4, MongolWalk4
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	j main_generateUnits
-	nop
+  li $t0, 450 
+  li $t1, 175 
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
+
+  li $t2, 42 
+  li $t3, 64 
+  la $t4, MongolWalk1
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 44 
+  li $t3, 62 
+  la $t4, MongolWalk2
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 43 
+  li $t3, 62 
+  la $t4, MongolWalk3
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 43 
+  li $t3, 62 
+  la $t4, MongolWalk4
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  j main_generateUnits
+  nop
+
 
 paladinWalk:
-	li $t0, 0 
-	li $t1, 150 
-	sw $t0, 0($sp)
-	sw $t1, 4($sp)
-	
-	li $t2, 50 
-	li $t3, 84 
-	la $t4, PaladinWalk1
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	li $t2, 52 
-	li $t3, 86 
-	la $t4, PaladinWalk2
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	li $t2, 58 
-	li $t3, 85 
-	la $t4, PaladinWalk3
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	li $t2, 63 
-	li $t3, 80 
-	la $t4, PaladinWalk4
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
-	nop
-	
-	j main_generateUnits
-	nop
+  li $t0, 0 
+  li $t1, 150 
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
+
+  li $t2, 50 
+  li $t3, 84 
+  la $t4, PaladinWalk1
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 52 
+  li $t3, 86 
+  la $t4, PaladinWalk2
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 58 
+  li $t3, 85 
+  la $t4, PaladinWalk3
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 63 
+  li $t3, 80 
+  la $t4, PaladinWalk4
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  j main_generateUnits
+  nop
 
 
 #
@@ -198,7 +194,6 @@ paladinWalk:
 #    $a2 --> color hex code
 #
 drawPixel:
-
   # get size of a row
   lw $t0, word_size
   lw $t1, width
@@ -231,7 +226,6 @@ drawPixel:
 #   16($sp) --> address of bitmap pixel colors
 #
 drawBitmap:
-
   lw $s0, 0($sp)
   lw $s1, 4($sp)
   lw $s2, 8($sp)
@@ -281,46 +275,46 @@ drawBitmap:
 #    none
 #
 sleep:
-	ori $v0, $zero, 32		# Syscall sleep
-	ori $a0, $zero, 60		# For this many miliseconds
-	syscall
-	jr $ra				# Return
-	nop
+  ori $v0, $zero, 32    # Syscall sleep
+  ori $a0, $zero, 60    # For this many miliseconds
+  syscall
+  jr $ra        # Return
+  nop
 
 #
 #  Parameters:
 #    none
 #  Returns:
-#	 v0 = player(side) OR exit program
+#   v0 = player(side) OR exit program
 #
 getInput:
-	lw $t0, 0xFFFF0004		# Load input value
+  lw $t0, 0xFFFF0004    # Load input value
 getInput_play:
-	bne $t0, 112, getInput_left
-	nop
-	ori $v0, $zero, 0x01000000	# play
-	j getInput_done
-	nop
+  bne $t0, 112, getInput_left
+  nop
+  ori $v0, $zero, 0x01000000  # play
+  j getInput_done
+  nop
 getInput_left:
-	bne $t0, 102, getInput_right
-	nop
-	ori $v0, $zero, 0x02000000	# left
-	j getInput_done
-	nop
+  bne $t0, 102, getInput_right
+  nop
+  ori $v0, $zero, 0x02000000  # left
+  j getInput_done
+  nop
 getInput_right:
-	bne $t0, 106, getInput_exit
-	nop
-	ori $v0, $zero, 0x03000000	# right
-	j getInput_done
-	nop
+  bne $t0, 106, getInput_exit
+  nop
+  ori $v0, $zero, 0x03000000  # right
+  j getInput_done
+  nop
 getInput_exit:
-	bne $t0, 120, getInput_none
-	nop
-	ori $v0, $zero, 0x04000000	# exit
-	j getInput_done
-	nop
+  bne $t0, 120, getInput_none
+  nop
+  ori $v0, $zero, 0x04000000  # exit
+  j getInput_done
+  nop
 getInput_none:
-						# Do nothing
+  # Do nothing
 getInput_done:
-	jr $ra				# Return
-	nop	
+  jr $ra        # Return
+  nop
