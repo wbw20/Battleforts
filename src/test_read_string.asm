@@ -1,15 +1,43 @@
 .data
-str:        .ascii "0fff00000fff"
-stringLength: .word 12
+str:        .ascii "0fff00000fff"	# first value 1048320
 error_str:  .asciiz "ERROR"
 new_line:   .ascii "\n"
+f:          .asciiz "bmp_colors.txt"      # filename for input
+buffer:     .space 12
+fileLength: .word 12
 
 .text
 
-lw $a0, stringLength     # allocate heap memory for string
+#open a file for reading
+li   $v0, 13       # system call for open file
+la   $a0, f        # board file name
+li   $a1, 0        # Open for reading
+li   $a2, 0
+syscall            # open a file (file descriptor returned in $v0)
+move $s6, $v0      # save the file descriptor 
+
+#read from file
+li   $v0, 14       # system call for read from file
+move $a0, $s6      # file descriptor 
+la   $a1, buffer   # address of buffer to which to read
+lw   $a2, fileLength
+syscall            # read from file
+
+# Close the file 
+li   $v0, 16       # system call for close file
+move $a0, $s6      # file descriptor to close
+syscall            # close file
+
+lw $a0, fileLength      # allocate heap memory for string
 li $v0, 9 # syscall 9 (sbrk)
 syscall
-la $a0, str
+
+li $v0, 8
+la $a0, buffer
+lw $a1, fileLength
+syscall
+
+la $a0, ($v0)
 move $a1, $v0
 jal parseString
 lw $a0, ($v0)
@@ -25,7 +53,7 @@ j exit
 # returns heap memory address
 parseString:
   move $t7, $a1       # beginning of allocated memory
-  lw $t8, stringLength
+  lw $t8, fileLength
   move $t9, $a0
   subu $sp, $sp, 8
   sw $ra, ($sp)        # store return address
@@ -87,13 +115,13 @@ getColorComponentValue:
   jal charToDecValue
   move $t4, $v0
   sll $t4, $t4, 4
-  add $s1, $s1, $t4	     # return value += val(str[0]) * 16 
+  add $s1, $s1, $t4	     # return value += val(buffer[0]) * 16 
   
   lb $t3, 1($s2)
   move $a0, $t3
   jal charToDecValue
   move $t4, $v0
-  add $s1, $s1, $t4	     # return value += val(str[1])
+  add $s1, $s1, $t4	     # return value += val(buffer[1])
   move $v0, $s1
   jr $s0
 
