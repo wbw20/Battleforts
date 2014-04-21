@@ -4,6 +4,7 @@
 height:         .word 512
 width:          .word 512
 word_size:      .word 4
+hot_pink:       .word 0xff0080
 
 display:        .space 0x4000
 
@@ -255,7 +256,9 @@ drawBitmap:
 
       lw $a2, 0($s4) # load color
 
+      beq $a2, hot_pink, db_skip # skip pink pixel
       jal drawPixel
+      db_skip:
 
       addi $s4, $s4, 4 # increment color address
 
