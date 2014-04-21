@@ -98,7 +98,7 @@ main_exit:
 
 mongolWalk:
   li $t0, 450 
-  li $t1, 175 
+  li $t1, 50
   sw $t0, 0($sp)
   sw $t1, 4($sp)
 
@@ -144,7 +144,7 @@ mongolWalk:
 
 paladinWalk:
   li $t0, 0 
-  li $t1, 150 
+  li $t1, 50 
   sw $t0, 0($sp)
   sw $t1, 4($sp)
 
