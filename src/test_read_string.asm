@@ -1,24 +1,50 @@
 .data
 fnf_err_str:    .ascii  "The file was not found: "
 value_err_str:  .ascii  "ERROR"
-file:           .asciiz "src/bmp_colors.txt"
+file:           .asciiz "built/pixels.txt"
 cont:           .ascii  "file contents:\n"
-buffer:         .space  1024
-test_str:       .ascii  "0fff00,000fff,fff000"
+buffer:         .space  1370245
 new_line:       .ascii  "\n"
-colorCount:     .word   6
-colorsLength:   .word   36    # colorCount * 6 (length of hex-value substring)
-numberOfImages: .word   2
-imageIndices:   .space  8    # number of images * 4 (word aligned)
+pixelCount:     .word   228371
+pixelMemSize:   .word   913484    # pixelCount * 4
+pixelsStrLength:.word   1370226   # pixelCount * 6 (length of hex-value substring)
+numberOfImages: .word   20
+imageOffsets:   .space  80        # number of images * 4 (word aligned)
+
+################### Indexes in imageOffsets array ###################
+BF_Menu_Index:  .word   0
+Instruct_Index: .word   1
+MFight1_Index:  .word   2
+MFight2_Index:  .word   3
+MFight3_Index:  .word   4
+MFight4_Index:  .word   5
+MFight5_Index:  .word   6
+MWalk1_Index:   .word   7 
+MWalk2_Index:   .word   8
+MWalk3_Index:   .word   9
+MWalk4_Index:   .word   10
+PFight1_Index:  .word   11
+PFight2_Index:  .word   12
+PFight3_Index:  .word   13
+PFight4_Index:  .word   14
+PFight5_Index:  .word   15
+PWalk1_Index:   .word   16
+PWalk2_Index:   .word   17
+PWalk3_Index:   .word   18
+PWalk4_Index:   .word   19
 
 
 .text
 
 jal readPixelsToBuffer
 
-li $a0, 72      # allocate heap memory for string
-li $v0, 9 	    # syscall 9 (sbrk)
+lw $a0, pixelMemSize       # allocate heap memory for pixel data
+li $v0, 9
 syscall
+
+la $t0, imageOffsets
+li $t1, 0
+sw $t1, ($t0)           # initialize imageOffsets
 
 la $a0, buffer
 move $a1, $v0
@@ -34,6 +60,7 @@ j exit
 
 readPixelsToBuffer:
   # Open File
+
   open:
     li    $v0, 13        # Open File Syscall
     la    $a0, file      # Load File Name
@@ -47,14 +74,14 @@ readPixelsToBuffer:
   read:
     li    $v0, 14        # Read File Syscall
     move  $a0, $s6       # Load File Descriptor
-    la    $a1, buffer    # Load Buffer Address
-    li    $a2, 1024      # Buffer Size
+    la    $a1, buffer     # Load Buffer Address     
+    li    $a2, 1370245
     syscall
    
-  print:
-    li    $v0, 4         # Print String Syscall
-    la    $a0, cont      # Load Contents String
-    syscall
+#  print:
+#    li    $v0, 4         # Print String Syscall
+#    la    $a0, cont      # Load Contents String
+#    syscall
    
   # Close File
   close:
@@ -62,6 +89,7 @@ readPixelsToBuffer:
     move  $a0, $s6       # Load File Descriptor
     syscall
 
+  #addu $sp, $sp, 4
   jr $ra
 
 # $a0 = address of full string
@@ -69,7 +97,7 @@ readPixelsToBuffer:
 # returns heap memory address
 parseString:
   move $t7, $a1       # beginning of allocated memory
-  lw $t8, colorsLength    # i = colorsLength
+  lw $t8, pixelsStrLength    # i = pixelsStrLength
   move $t9, $a0
   subu $sp, $sp, 8
   sw $ra, ($sp)        # store return address
@@ -83,16 +111,14 @@ parseString:
     subu $t8, $t8, 6        # decrement i
     addi $t9, $t9, 6
     lb $t4, ($t9)
-    beq $t4, '\n', addToImageIndices    # comma or \n?
-    
+    beq $t4, '\n', addToimageOffsets    # comma or \n?
     readNextPixel:
-    addi $t9, $t9, 1                 # go to next hex-value regardless of separating char
     bnez $t8, loopThroughString
     j parse_return
 
-    addToImageIndices:
-      lw $t0, colorsLength
-      subu $t0, $t0, $t8        # colorsLength - i
+    addToimageOffsets:
+      lw $t0, pixelsStrLength
+      subu $t0, $t0, $t8        # pixelsStrLength - i
       li $t2, 6
       divu $t0, $t2
       mflo $t0
@@ -100,7 +126,7 @@ parseString:
       multu $t0, $t2
       mflo $t0
 
-      la $t1, imageIndices
+      la $t1, imageOffsets
       loopThroughArray:
         lw $t2, ($t1)
         beq $t2, 0, insertNewIndex
@@ -109,6 +135,7 @@ parseString:
 
       insertNewIndex:
         sw $t0, ($t1)
+        addi $t9, $t9, 1                 
   
       j readNextPixel
 
@@ -207,11 +234,13 @@ value_error:
   li $v0, 4
   la $a0, value_err_str
   syscall
+  j exit
 
 fnf_error:
-    li    $v0, 4        # Print String Syscall
-    la    $a0, fnf_err_str    # Load Error String
-    syscall
+  li    $v0, 4        # Print String Syscall
+  la    $a0, fnf_err_str    # Load Error String
+  syscall
+  j exit
 
 exit:
 li $v0, 10

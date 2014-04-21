@@ -1,69 +1,190 @@
 .data
 
-fin: .asciiz "bmp_colors.txt"      # filename for input
-
-# colors
-red:            .word 0xff0000
-green:          .word 0x00ff00
-blue:           .word 0x0000ff
-
 # constants
 height:         .word 512
 width:          .word 512
 word_size:      .word 4
+hot_pink:       .word 0xff0080
 
 display:        .space 0x4000
 
 .text
 
-jal loadImageData
-
-li $t0, 0
-li $t1, 0
-li $t2, 42
-li $t3, 63
-la $t4, 0($v0)
-addi $sp, $sp, -20
-sw $t0, 0($sp)
-sw $t1, 4($sp)
-sw $t2, 8($sp)
-sw $t3, 12($sp)
-sw $t4, 16($sp)
-
-jal drawBitmap
-
-j exit
+main_menu:
+  li $t0, 80 
+  li $t1, 0
+  li $t2, 327 
+  li $t3, 95 
+  la $t4, Battleforts #Battleforts
+  addi $sp, $sp, -20
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
 
 
-loadImageData:
+main_waitLoop:
+  # Wait for the player to press a key to begin the game
+  jal sleep      
+  nop
+  lw $t0, 0xFFFF0000      # Retrieve transmitter control ready bit
+  blez $t0, main_waitLoop    # Check if a key was pressed
+  nop
 
-  li   $v0, 13       # system call for open file
-  la   $a0, fin      # board file name
-  li   $a1, 0        # Open for reading
-  li   $a2, 0
-  syscall            # open a file (file descriptor returned in $v0)
-  move $s6, $v0      # save the file descriptor 
 
-  li $a0, 1024
-  li $v0 9 # syscall 9 (sbrk)
+main_play:
+  jal getInput
+  nop
+  or $t6, $zero, $v0  # Backup direction from keyboard
+
+  beq $t6, 0x04000000, main_exit
+  nop
+
+  bne $t6, 0x01000000, main_play
+  nop
+
+
+main_instructions:
+  li $t0, 50
+  li $t1, 0
+  li $t2, 393 
+  li $t3, 104 
+  la $t4, Instructions #Battleforts
+  addi $sp, $sp, -20
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+
+main_generateUnits:
+  jal getInput
+  nop
+  or $t6, $zero, $v0  # Backup direction from keyboard
+
+  beq $t6, 0x04000000, main_exit
+  nop
+
+main_generateUnitsLeft:
+  bne $t6, 0x02000000, main_generateUnitsRight
+  nop
+  b paladinWalk
+  nop
+
+
+main_generateUnitsRight:
+  bne $t6, 0x03000000, main_done
+  nop
+  b mongolWalk
+  nop
+
+
+main_done:
+  b main_generateUnits
+
+
+main_exit:
+  li $v0, 10
   syscall
 
-  la $t0, 0($v0)  # address for start of heap memory
 
-  #read from file
-  li   $v0, 14       # system call for read from file
-  move $a0, $s6      # file descriptor 
-  la   $a1, 0($t0)   # address of buffer to which to read
-  li   $a2, 10000     # hardcoded buffer length
-  syscall            # read from file
 
-  # Close the file 
-  li   $v0, 16       # system call for close file
-  move $a0, $s6      # file descriptor to close
-  syscall            # close file
+mongolWalk:
+  li $t0, 450 
+  li $t1, 175 
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
 
-  la $v0, 0($t0)
-  jr $ra
+  li $t2, 42 
+  li $t3, 64 
+  la $t4, MongolWalk1
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 44 
+  li $t3, 62 
+  la $t4, MongolWalk2
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 43 
+  li $t3, 62 
+  la $t4, MongolWalk3
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 43 
+  li $t3, 62 
+  la $t4, MongolWalk4
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  j main_generateUnits
+  nop
+
+
+paladinWalk:
+  li $t0, 0 
+  li $t1, 150 
+  sw $t0, 0($sp)
+  sw $t1, 4($sp)
+
+  li $t2, 50 
+  li $t3, 84 
+  la $t4, PaladinWalk1
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 52 
+  li $t3, 86 
+  la $t4, PaladinWalk2
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 58 
+  li $t3, 85 
+  la $t4, PaladinWalk3
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  li $t2, 63 
+  li $t3, 80 
+  la $t4, PaladinWalk4
+  sw $t2, 8($sp)
+  sw $t3, 12($sp)
+  sw $t4, 16($sp)
+  jal drawBitmap
+  nop
+
+  j main_generateUnits
+  nop
 
 
 #
@@ -73,7 +194,6 @@ loadImageData:
 #    $a2 --> color hex code
 #
 drawPixel:
-
   # get size of a row
   lw $t0, word_size
   lw $t1, width
@@ -96,6 +216,7 @@ drawPixel:
 
   jr $ra # return
 
+
 #
 #  Parameters:
 #    0($sp) --> x coordinate
@@ -105,41 +226,98 @@ drawPixel:
 #   16($sp) --> address of bitmap pixel colors
 #
 drawBitmap:
+  lw $s0, 0($sp)
+  lw $s1, 4($sp)
+  lw $s2, 8($sp)
+  lw $s3, 12($sp)
+  lw $s4, 16($sp)
 
-  lw $t0, 0($sp)
-  lw $t1, 4($sp)
-  lw $t2, 8($sp)
-  lw $t3, 12($sp)
-  lw $t4, 16($sp)
+  # x counter
+  li $s5, 0
+
+  # jal paints over $ra
+  move $s7, $ra
 
   db_row:
     # at the end of this row?
-    bltz $t2, db_return
-    lw $t3, 12($sp)
-    add $a0, $t0, $t2 # x coordinate
+    beq $s2, $s5 db_return
+
+    # y counter
+    li $s6, 0
+
+    lw $s3, 12($sp)
+    add $a0, $s0, $s5 # x coordinate
 
     db_column:
       # at the end of this column?
-      bltz $t3, db_end_row
-      add $a1, $t1, $t3 # y coordinate
+      beq $s3, $s6, db_end_row
+      add $a1, $s1, $s6 # y coordinate
 
-      lw $a2, 0($t4) # load color
+      lw $a2, 0($s4) # load color
 
+      lw $t0, hot_pink
+      beq $a2, $t0, db_skip # skip pink pixel
       jal drawPixel
+      db_skip:
 
-      addi $t4, $t4, 4 # increment color address
+      addi $s4, $s4, 4 # increment color address
 
-      addi $t3, $t3, -1
+      addi $s6, $s6, 1
       j db_column
 
   db_end_row:
-    addi $t2, $t2, -1
+    addi $s5, $s5, 1
     j db_row
 
   db_return:
-    jr $ra # return
+    jr $s7 # return
 
 
-exit:
-  li $v0, 10
+#
+#  Parameters:
+#    none
+#
+sleep:
+  ori $v0, $zero, 32    # Syscall sleep
+  ori $a0, $zero, 60    # For this many miliseconds
   syscall
+  jr $ra        # Return
+  nop
+
+#
+#  Parameters:
+#    none
+#  Returns:
+#   v0 = player(side) OR exit program
+#
+getInput:
+  lw $t0, 0xFFFF0004    # Load input value
+getInput_play:
+  bne $t0, 112, getInput_left
+  nop
+  ori $v0, $zero, 0x01000000  # play
+  j getInput_done
+  nop
+getInput_left:
+  bne $t0, 102, getInput_right
+  nop
+  ori $v0, $zero, 0x02000000  # left
+  j getInput_done
+  nop
+getInput_right:
+  bne $t0, 106, getInput_exit
+  nop
+  ori $v0, $zero, 0x03000000  # right
+  j getInput_done
+  nop
+getInput_exit:
+  bne $t0, 120, getInput_none
+  nop
+  ori $v0, $zero, 0x04000000  # exit
+  j getInput_done
+  nop
+getInput_none:
+  # Do nothing
+getInput_done:
+  jr $ra        # Return
+  nop
