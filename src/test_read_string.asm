@@ -1,52 +1,66 @@
 .data
-str:        .ascii "0fff00000fff"	# first value 1048320
-error_str:  .asciiz "ERROR"
+fnf_err_str:    .ascii  "The file was not found: "
+value_err_str:  .ascii "ERROR"
+file:    .asciiz    "src/bmp_colors.txt"
+cont:    .ascii  "file contents: "
+buffer: .space 1024
+test_str:        .ascii "0fff00,000fff,fff000"	# first value 1048320
 new_line:   .ascii "\n"
-f:          .asciiz "bmp_colors.txt"      # filename for input
-buffer:     .space 12
-fileLength: .word 12
+fileLength: .word 18
+imageIndices: .word 0
+
 
 .text
 
-#open a file for reading
-li   $v0, 13       # system call for open file
-la   $a0, f        # board file name
-li   $a1, 0        # Open for reading
-li   $a2, 0
-syscall            # open a file (file descriptor returned in $v0)
-move $s6, $v0      # save the file descriptor 
+jal readPixelsToBuffer
 
-#read from file
-li   $v0, 14       # system call for read from file
-move $a0, $s6      # file descriptor 
-la   $a1, buffer   # address of buffer to which to read
-lw   $a2, fileLength
-syscall            # read from file
-
-# Close the file 
-li   $v0, 16       # system call for close file
-move $a0, $s6      # file descriptor to close
-syscall            # close file
-
-lw $a0, fileLength      # allocate heap memory for string
-li $v0, 9 # syscall 9 (sbrk)
+li $a0, 72      # allocate heap memory for string
+li $v0, 9 	    # syscall 9 (sbrk)
 syscall
 
-li $v0, 8
 la $a0, buffer
-lw $a1, fileLength
-syscall
-
-la $a0, ($v0)
 move $a1, $v0
 jal parseString
-lw $a0, ($v0)
-jal printInt
+move $s0, $v0
 li $v0, 4
 la $a0, new_line
 syscall
-
+lw $a0, 4($s0)
+jal printInt
 j exit
+
+
+readPixelsToBuffer:
+  # Open File
+  open:
+      li    $v0, 13        # Open File Syscall
+      la    $a0, file    # Load File Name
+      li    $a1, 0        # Read-only Flag
+      li    $a2, 0        # (ignored)
+      syscall
+      move    $s6, $v0    # Save File Descriptor
+      blt    $v0, 0, fnf_error    # Goto Error
+   
+  # Read Data
+  read:
+      li    $v0, 14        # Read File Syscall
+      move    $a0, $s6    # Load File Descriptor
+      la    $a1, buffer    # Load Buffer Address
+      li    $a2, 1024    # Buffer Size
+      syscall
+   
+  print:
+      li    $v0, 4        # Print String Syscall
+      la    $a0, cont    # Load Contents String
+      syscall
+   
+  # Close File
+  close:
+      li    $v0, 16        # Close File Syscall
+      move    $a0, $s6    # Load File Descriptor
+      syscall
+
+  jr $ra
 
 # $a0 = address of full string
 # $a1 = heap memory address
@@ -65,7 +79,8 @@ parseString:
     sw $v0, ($t7)
     addi $t7, $t7, 4
     subu $t8, $t8, 6
-    addi $t9, $t9, 6
+    addi $t9, $t9, 7
+    #beq $t9, '\n', addToImageIndices
     bnez $t8, loopThroughString
 
   lw $ra, ($sp)
@@ -131,9 +146,9 @@ getColorComponentValue:
 charToDecValue:
   la $t3, 0($ra)	# original return address
   li $t2, 0	# sum = 0
-  bltz $a0, error # < 0
+  bltz $a0, value_error # < 0
   subi $t0, $a0, 'f'
-  bgtz $t0, error # > 'f'
+  bgtz $t0, value_error # > 'f'
 
   subi $t0, $a0, 'a'
   bltzal $t0, belowTen # $t1 < 'a'
@@ -158,11 +173,16 @@ printInt:
   syscall
   jr $ra
 
-error:
+value_error:
   li $v0, 4
-  la $a0, error_str
+  la $a0, value_err_str
   syscall
-  
+
+fnf_error:
+    li    $v0, 4        # Print String Syscall
+    la    $a0, fnf_err_str    # Load Error String
+    syscall
+
 exit:
-  li $v0, 10
-  syscall
+li $v0, 10
+syscall
