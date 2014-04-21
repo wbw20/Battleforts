@@ -71,8 +71,6 @@ main_generateUnits:
   beq $t6, 0x04000000, main_exit
   nop
 
->>>>>>> keyboard_and_menu
-
 main_generateUnitsLeft:
   bne $t6, 0x02000000, main_generateUnitsRight
   nop
