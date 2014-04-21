@@ -256,7 +256,8 @@ drawBitmap:
 
       lw $a2, 0($s4) # load color
 
-      beq $a2, hot_pink, db_skip # skip pink pixel
+      lw $t0, hot_pink
+      beq $a2, $t0, db_skip # skip pink pixel
       jal drawPixel
       db_skip:
 
