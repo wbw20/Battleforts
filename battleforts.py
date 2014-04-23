@@ -40,7 +40,7 @@ def prepare_battleforts():
 
     with open("built/pixels.txt", 'w') as f:
         for bmp_name, pixels in bmp_pixels.items():
-            f.write("{}\n".format("".join(pixels)))
+            f.write("{}\n".format(",".join(pixels)))
 
     all_pixels = bmp_pixels.values()
     total_number_of_pixels = len(list(itertools.chain(*all_pixels)))

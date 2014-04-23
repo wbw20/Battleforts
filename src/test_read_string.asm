@@ -1,13 +1,15 @@
 .data
 fnf_err_str:    .ascii  "The file was not found: "
 value_err_str:  .ascii  "ERROR"
-file:           .asciiz "built/pixels.txt"
+dataFile:       .asciiz "built/pixels.txt"
 cont:           .ascii  "file contents:\n"
-buffer:         .space  1370245
-new_line:       .ascii  "\n"
+buffer:         .space  3248   
+bufferLength:   .word   812
+pixelsPerChunk: .word   116
+dataFileLength: .word   1598597   # number of characters
 pixelCount:     .word   228371
 pixelMemSize:   .word   913484    # pixelCount * 4
-pixelsStrLength:.word   1370226   # pixelCount * 6 (length of hex-value substring)
+pixelsStrLength:.word   696   # pixelsPerChunk * 6 (length of hex-value substring)
 numberOfImages: .word   20
 imageOffsets:   .space  80        # number of images * 4 (word aligned)
 
@@ -33,70 +35,83 @@ PWalk2_Index:   .word   17
 PWalk3_Index:   .word   18
 PWalk4_Index:   .word   19
 
-
 .text
-
-jal readPixelsToBuffer
 
 lw $a0, pixelMemSize       # allocate heap memory for pixel data
 li $v0, 9
 syscall
 
-la $t0, imageOffsets
+la $t0, imageOffsets       # initialize imageOffsets
 li $t1, 0
-sw $t1, ($t0)           # initialize imageOffsets
+sw $t1, ($t0)  
 
-la $a0, buffer
-move $a1, $v0
-jal parseString
-move $s0, $v0
-li $v0, 4
-la $a0, new_line
-syscall
-lw $a0, 4($s0)
-jal printInt
+move $a0, $v0
+jal readPixelsToHeap
+
 j exit
 
 
-readPixelsToBuffer:
+# a0 = heap address
+readPixelsToHeap:
   # Open File
+  subu $sp, $sp, 8
+  sw $a0, ($sp)
+  sw $ra, 4($sp)
 
   open:
     li    $v0, 13        # Open File Syscall
-    la    $a0, file      # Load File Name
+    la    $a0, dataFile  # Load File Name
     li    $a1, 0         # Read-only Flag
     li    $a2, 0         # (ignored)
     syscall
     move  $s6, $v0       # Save File Descriptor
     blt   $v0, 0, fnf_error
    
+  lw $s5, dataFileLength
   # Read Data
-  read:
-    li    $v0, 14        # Read File Syscall
-    move  $a0, $s6       # Load File Descriptor
-    la    $a1, buffer     # Load Buffer Address     
-    li    $a2, 1370245
+  readChunk:
+    li    $v0, 14            # Read File Syscall
+    move  $a0, $s6           # Load File Descriptor
+    la    $a1, buffer        # Load Buffer Address     
+    lw    $a2, bufferLength  # Load in chunk
     syscall
-   
-#  print:
-#    li    $v0, 4         # Print String Syscall
-#    la    $a0, cont      # Load Contents String
-#    syscall
-   
+    subu $s5, $s5, $a2
+
+  lw $a0, ($sp)
+  jal translateBufferToHeap
+  sw $v0, ($sp)
+  li $v0, 1
+  move $a0, $s5
+  syscall
+  bgtz $s5, readChunk
+
   # Close File
   close:
     li    $v0, 16        # Close File Syscall
     move  $a0, $s6       # Load File Descriptor
     syscall
 
-  #addu $sp, $sp, 4
+  lw $ra, 4($sp)
+  addu $sp, $sp, 8
+
+  jr $ra
+
+# $a0 = heap address
+translateBufferToHeap:
+  subu $sp, $sp, 4
+  sw $ra, ($sp)
+  move $a1, $a0
+  la $a0, buffer
+  jal parseString
+  lw $ra, ($sp)
+  addu $sp, $sp, 4
   jr $ra
 
 # $a0 = address of full string
 # $a1 = heap memory address
 # returns heap memory address
 parseString:
-  move $t7, $a1       # beginning of allocated memory
+  move $s3, $a1       # beginning of allocated memory
   lw $t8, pixelsStrLength    # i = pixelsStrLength
   move $t9, $a0
   subu $sp, $sp, 8
@@ -106,13 +121,15 @@ parseString:
   loopThroughString:        # while i > 0
     move $a0, $t9
     jal getColorValue
-    sw $v0, ($t7)
-    addi $t7, $t7, 4
+    sw $v0, ($s3)
+    addi $s3, $s3, 4
     subu $t8, $t8, 6        # decrement i
     addi $t9, $t9, 6
     lb $t4, ($t9)
     beq $t4, '\n', addToimageOffsets    # comma or \n?
+
     readNextPixel:
+    addi $t9, $t9, 1
     bnez $t8, loopThroughString
     j parse_return
 
@@ -134,8 +151,7 @@ parseString:
         j loopThroughArray
 
       insertNewIndex:
-        sw $t0, ($t1)
-        addi $t9, $t9, 1                 
+        sw $t0, ($t1)                
   
       j readNextPixel
 
@@ -143,6 +159,7 @@ parseString:
     lw $ra, ($sp)
     lw $v0, 4($sp)
     addu $sp, $sp, 8
+    move $v0, $s3
     jr $ra
 
 # $a0 = address of initial character in substring
