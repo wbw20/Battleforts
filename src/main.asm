@@ -7,11 +7,16 @@ word_size:      .word 4
 hot_pink:       .word 0xff0080
 
 display:        .space 0x4000
+data_pointer:           .word 0x103df04c
+data:           .word 0x103df050
+
+mongol:         .word 1
+paladin:         .word 2
 
 .text
-
-
+  
 main_menu:
+
   li $t0, 80 
   li $t1, 0
   li $t2, 327 
@@ -75,6 +80,23 @@ main_generateUnits:
 main_generateUnitsLeft:
   bne $t6, 0x02000000, main_generateUnitsRight
   nop
+
+  lw $t0, data_pointer
+
+  lw $t1, paladin
+  sw $t1, ($t0)
+  addi $t0, $t0, 4
+  li $t1, 450
+  sw $t1, ($t0)
+  addi $t0, $t0, 4
+  li $t1, 50
+  sw $t1, ($t0)
+  addi $t0, $t0, 4
+  li $t1, 100
+  sw $t1, ($t0)
+  addi $t0, $t0, 4
+  sw $t0, data_pointer
+
   b paladinWalk
   nop
 
