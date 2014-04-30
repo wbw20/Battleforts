@@ -5,66 +5,108 @@ height:         .word 512
 width:          .word 512
 word_size:      .word 4
 hot_pink:       .word 0xff0080
+clear:					.word 0X000000
 
 display:        .space 0x4000
 data_pointer:   .word 0x103df050
 data:           .word 0x103df050
-new_line:       .ascii "\n"
+
 .text
   
-main_menu:
-
-  li $t0, 80 
-  li $t1, 0
-  li $t2, 327 
-  li $t3, 95 
-  la $t4, Battleforts #Battleforts
-  addi $sp, $sp, -20
-  sw $t0, 0($sp)
-  sw $t1, 4($sp)
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
-
-
-main_waitLoop:
-  # Wait for the player to press a key to begin the game
-  jal sleep      
-  nop
-  lw $t0, 0xFFFF0000      # Retrieve transmitter control ready bit
-  blez $t0, main_waitLoop    # Check if a key was pressed
-  nop
+# Display main menu	
+main_menu:	
+									
+	addi $sp, $sp, -20
+	
+	li $t0, 75																			# x value 
+	li $t1, -175																		# y value
+	li $t2, 327 																		# width
+	li $t3, 95 																			# height
+	la $t4, Battleforts															# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
 
 
-main_play:
-  jal getInput
-  nop
-  or $t6, $zero, $v0  # Backup direction from keyboard
+# Check user input for main menu
+main_menu_userInput:
+												                					# Wait for user to press a key
+	lw $t0, 0xFFFF0000															# Retrieve transmitter control ready bit
+	blez $t0, main_menu_userInput										# Check if a key was pressed
+											
+	jal getInput																		# Read keyboard input
+  or $t6, $zero, $v0															# Backup direction from keyboard
+	beq $t6, 0x04000000, main_exit									# Exit if user pressed 'x'
+	bne $t6, 0x01000000, main_menu_userInput				# Play if user pressed 'p'
+																									# Otherwise, loop until valid key is pressed	
 
-  beq $t6, 0x04000000, main_exit
-  nop
+ 
+# Clear main menu 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+main_clearMenu: 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 		
+									
+	li $t0, 75																			# x value
+	li $t1, -175																		# y value
+	li $t2, 327 																		# width
+	li $t3, 95 																			# height
+	la $t4, clear																		# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap	
 
-  bne $t6, 0x01000000, main_play
-  nop
 
-
+# Display instruction menu to user		
 main_instructions:
-  li $t0, 50
-  li $t1, 0
-  li $t2, 393 
-  li $t3, 104 
-  la $t4, Instructions #Battleforts
-  addi $sp, $sp, -20
-  sw $t0, 0($sp)
-  sw $t1, 4($sp)
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
 
+	li $t0, 40																		  # x value
+	li $t1, -175																		# y value
+	li $t2, 393 																		# width
+	li $t3, 104 																		# height
+	la $t4, Instructions 														# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+
+#Check user input for instruction menu
+main_instructions_userInput:												
+  																								# Wait for user to press a key
+	lw $t0, 0xFFFF0000															# Retrieve transmitter control ready bit
+  blez $t0, main_instructions_userInput						# Check if a key was pressed
+
+  jal getInput																		# Read keyboard input
+  or $t6, $zero, $v0															# Backup direction from keyboard
+
+  beq $t6, 0x02000000, main_clearInstructions			# Clear instructions if user pressed 'f' 
+  beq $t6, 0x03000000, main_clearInstructions			# Clear instructions if user pressed 'j' 
+  beq $t6, 0x04000000, main_exit									# Exit if user pressed 'f'
+
+	j main_instructions_userInput										# Loop until valid key is pressed 
+
+ 
+# Clear instruction menu
+main_clearInstructions:
+
+	li $t0, 40																		  # x value
+	li $t1, -175																		# y value
+	li $t2, 393 																		# width
+	li $t3, 104 																		# height
+	la $t4, clear 																	# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	
 
 main_generateUnits:
   jal getInput
