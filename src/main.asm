@@ -7,12 +7,9 @@ word_size:      .word 4
 hot_pink:       .word 0xff0080
 
 display:        .space 0x4000
-data_pointer:   .word 0x103df04c
+data_pointer:   .word 0x103df050
 data:           .word 0x103df050
-
-mongol:         .word 1
-paladin:         .word 2
-
+new_line:       .ascii "\n"
 .text
   
 main_menu:
@@ -82,11 +79,8 @@ main_generateUnitsLeft:
   nop
 
   # store a paladin
-  lw $a0, paladin
+  la $a0, PaladinWalk1
   jal store_unit
-
-  b paladinWalk
-  nop
 
 
 main_generateUnitsRight:
@@ -94,11 +88,88 @@ main_generateUnitsRight:
   nop
 
   # store a mongol
-  lw $a0, mongol
+  la $a0, MongolWalk1
   jal store_unit
 
-  b mongolWalk
-  nop
+
+main_done:
+  jal render
+  b main_generateUnits
+
+
+main_exit:
+  li $v0, 10
+  syscall
+
+
+#
+#  Parameters:
+#    none
+#  Returns:
+#   none
+#
+render:
+  # remember return address
+  subu $sp, $sp, 4
+  sw $ra, 0($sp)
+  addi $sp, $sp, 4
+
+  lw $s0, data # bottom of unit stack
+  lw $s1, data_pointer
+
+  read_unit:
+    move $a0, $s0
+    li $v0, 1
+    syscall
+
+    la $a0, new_line
+    li $v0, 4
+    syscall
+
+    move $a0, $s1
+    li $v0, 1
+    syscall
+
+    la $a0, new_line
+    li $v0, 4
+    syscall
+
+    la $a0, new_line
+    li $v0, 4
+    syscall
+
+    la $a0, new_line
+    li $v0, 4
+    syscall
+
+    #j main_exit
+
+    beq $s0, $s1, r_return # no more units
+
+    lw $t0, ($s0) # get unit bitmap
+    lw $t1, 4($s0) # x position
+    lw $t2, 8($s0) # y position
+    lw $t3, 12($s0) # health
+
+    li $t4, 86
+    li $t5, 107
+
+    # do the drawing
+    sw $t1, ($sp)     # x position
+    sw $t2, 4($sp)    # y position
+    sw $t4, 8($sp)    # width
+    sw $t5, 12($sp)   # height
+    sw $t0, 16($sp)   # height
+    jal drawBitmap
+
+    addi $s0, $s0, 16
+    j read_unit
+
+  r_return:
+    subu $sp, $sp, 4
+    lw $ra, ($sp)
+    addu $sp, $sp, 4
+    jr $ra  
 
 
 #
@@ -108,7 +179,7 @@ main_generateUnitsRight:
 #   none
 #
 store_unit:
-  lw $t0, data_pointer
+  lw $t0, data_pointer # HAHAHAHAHAHAHAHAHAHAHAH
 
   move $t1, $a0
   sw $t1, ($t0)
@@ -123,18 +194,7 @@ store_unit:
   sw $t1, ($t0)
   addi $t0, $t0, 4
   sw $t0, data_pointer
-
   jr $ra
-
-
-main_done:
-  b main_generateUnits
-
-
-main_exit:
-  li $v0, 10
-  syscall
-
 
 
 mongolWalk:
