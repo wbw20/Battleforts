@@ -7,7 +7,7 @@ word_size:      .word 4
 hot_pink:       .word 0xff0080
 
 display:        .space 0x4000
-data_pointer:           .word 0x103df04c
+data_pointer:   .word 0x103df04c
 data:           .word 0x103df050
 
 mongol:         .word 1
@@ -81,9 +81,36 @@ main_generateUnitsLeft:
   bne $t6, 0x02000000, main_generateUnitsRight
   nop
 
+  # store a paladin
+  lw $a0, paladin
+  jal store_unit
+
+  b paladinWalk
+  nop
+
+
+main_generateUnitsRight:
+  bne $t6, 0x03000000, main_done
+  nop
+
+  # store a mongol
+  lw $a0, mongol
+  jal store_unit
+
+  b mongolWalk
+  nop
+
+
+#
+#  Parameters:
+#    $a0 --> the type of unit to store
+#  Returns:
+#   none
+#
+store_unit:
   lw $t0, data_pointer
 
-  lw $t1, paladin
+  move $t1, $a0
   sw $t1, ($t0)
   addi $t0, $t0, 4
   li $t1, 450
@@ -97,15 +124,7 @@ main_generateUnitsLeft:
   addi $t0, $t0, 4
   sw $t0, data_pointer
 
-  b paladinWalk
-  nop
-
-
-main_generateUnitsRight:
-  bne $t6, 0x03000000, main_done
-  nop
-  b mongolWalk
-  nop
+  jr $ra
 
 
 main_done:
