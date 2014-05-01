@@ -308,6 +308,7 @@ render:
 #
 #  Parameters:
 #    $a0 --> the bitmap address of the unit
+#    $a1 --> the starting x position
 #  Returns:
 #   none
 #
@@ -317,13 +318,13 @@ store_unit:
   move $t1, $a0
   sw $t1, ($t0)
   addi $t0, $t0, 4
-  li $t1, 440      # x position
+  move $t1, $a1      # x position
   sw $t1, ($t0)
   addi $t0, $t0, 4
-  li $t1, 50       # y position
+  li $t1, 50         # y position
   sw $t1, ($t0)
   addi $t0, $t0, 4
-  li $t1, 100      # health
+  li $t1, 100        # health
   sw $t1, ($t0)
   addi $t0, $t0, 4
   sw $t0, data_pointer
