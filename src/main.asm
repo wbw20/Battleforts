@@ -9,7 +9,6 @@ hot_pink:       .word 0xff0080
 display:        .space 0x4000
 data_pointer:   .word 0x103df050
 data:           .word 0x103df050
-new_line:       .ascii "\n"
 .text
   
 main_menu:
@@ -109,67 +108,52 @@ main_exit:
 #   none
 #
 render:
-  # remember return address
-  subu $sp, $sp, 4
-  sw $ra, 0($sp)
-  addi $sp, $sp, 4
+  lw $t0, data          # bottom of unit stack
+  lw $t1, data_pointer  # top of unit stack
 
-  lw $s0, data # bottom of unit stack
-  lw $s1, data_pointer
+  addi $sp, $sp, -12
+  sw $ra, 0($sp)    # remember return address
+  sw $t0, 4($sp)    # remember bottom
+  sw $t1, 8($sp)    # remember top
+  addi $sp, $sp, 12
 
   read_unit:
-    move $a0, $s0
-    li $v0, 1
-    syscall
+    # retrive unit stack
+    addi $sp, $sp, -12
+    lw $t0, 4($sp)    # bottom
+    lw $t1, 8($sp)    # top
+    addi $sp, $sp, 12
 
-    la $a0, new_line
-    li $v0, 4
-    syscall
+    beq $t0, $t1, r_return # no more units
 
-    move $a0, $s1
-    li $v0, 1
-    syscall
+    lw $t2, ($t0) # get unit bitmap
+    lw $t3, 4($t0) # x position
+    lw $t4, 8($t0) # y position
+    lw $t5, 12($t0) # health
 
-    la $a0, new_line
-    li $v0, 4
-    syscall
-
-    la $a0, new_line
-    li $v0, 4
-    syscall
-
-    la $a0, new_line
-    li $v0, 4
-    syscall
-
-    #j main_exit
-
-    beq $s0, $s1, r_return # no more units
-
-    lw $t0, ($s0) # get unit bitmap
-    lw $t1, 4($s0) # x position
-    lw $t2, 8($s0) # y position
-    lw $t3, 12($s0) # health
-
-    li $t4, 86
-    li $t5, 107
+    li $t6, 86
+    li $t7, 107
 
     # do the drawing
-    sw $t1, ($sp)     # x position
-    sw $t2, 4($sp)    # y position
-    sw $t4, 8($sp)    # width
-    sw $t5, 12($sp)   # height
-    sw $t0, 16($sp)   # height
+    sw $t3, ($sp)     # x position
+    sw $t4, 4($sp)    # y position
+    sw $t6, 8($sp)    # width
+    sw $t7, 12($sp)   # height
+    sw $t2, 16($sp)   # bitmap address
     jal drawBitmap
 
-    addi $s0, $s0, 16
+    # update bottom pointer
+    addi $sp, $sp, -12
+    addi $t0, $t0, 16
+    sw $t0, 4($sp)
+    addi $sp, $sp, 12
     j read_unit
 
   r_return:
-    subu $sp, $sp, 4
+    addi $sp, $sp, -12
     lw $ra, ($sp)
-    addu $sp, $sp, 4
-    jr $ra  
+    addi $sp, $sp, 12
+    jr $ra
 
 
 #
@@ -179,7 +163,7 @@ render:
 #   none
 #
 store_unit:
-  lw $t0, data_pointer # HAHAHAHAHAHAHAHAHAHAHAH
+  lw $t0, data_pointer
 
   move $t1, $a0
   sw $t1, ($t0)
