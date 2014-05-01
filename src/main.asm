@@ -5,74 +5,192 @@ height:         .word 512
 width:          .word 512
 word_size:      .word 4
 hot_pink:       .word 0xff0080
+clear:					.word 0X000000
 
 display:        .space 0x4000
 data_pointer:   .word 0x103df050
 data:           .word 0x103df050
+new_line:       .ascii "\n"
+
+
 .text
-  
-main_menu:
 
-  li $t0, 80 
-  li $t1, 0
-  li $t2, 327 
-  li $t3, 95 
-  la $t4, Battleforts #Battleforts
-  addi $sp, $sp, -20
-  sw $t0, 0($sp)
-  sw $t1, 4($sp)
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
-
-
-main_waitLoop:
-  # Wait for the player to press a key to begin the game
-  jal sleep      
-  nop
-  lw $t0, 0xFFFF0000      # Retrieve transmitter control ready bit
-  blez $t0, main_waitLoop    # Check if a key was pressed
-  nop
-
-
-main_play:
-  jal getInput
-  nop
-  or $t6, $zero, $v0  # Backup direction from keyboard
-
-  beq $t6, 0x04000000, main_exit
-  nop
-
-  bne $t6, 0x01000000, main_play
-  nop
+#  
+# Desc:
+#		Display main menu
+# Parameters:
+# 	none
+# Returns:
+#		none
+#
+main_menu:	
+									
+	addi $sp, $sp, -20
+	
+	li $t0, 75																			# x position 
+	li $t1, -175																		# y position
+	li $t2, 327 																		# width
+	li $t3, 95 																			# height
+	la $t4, Battleforts															# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
 
 
+#
+# Desc:
+#		Check user input for main menu
+# Parameters:
+#		none
+# Returns:
+#		none
+#
+main_menu_userInput:
+												                					# Wait for user to press a key
+	lw $t0, 0xFFFF0000															# Retrieve transmitter control ready bit
+	blez $t0, main_menu_userInput										# Check if a key was pressed
+											
+	jal getInput																		# Read keyboard input
+  or $t6, $zero, $v0															# Backup direction from keyboard
+	beq $t6, 0x04000000, main_exit									# Exit if user pressed 'x'
+	bne $t6, 0x01000000, main_menu_userInput				# Play if user pressed 'p'
+																									# Otherwise, loop until valid key is pressed	
+
+
+# 
+# Desc: 
+#		Clear main menu
+# Parameters:
+#		none
+# Returns:
+#		none
+# 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 
+main_clearMenu: 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 		
+									
+	li $t0, 75																			# x position
+	li $t1, -175																		# y position
+	li $t2, 327 																		# width
+	li $t3, 95 																			# height
+	la $t4, clear																		# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap	
+
+
+#
+# Desc: 
+#		Display instruction menu	
+# Parameters:
+#		none
+# Returns:
+#		none
+#
 main_instructions:
-  li $t0, 50
-  li $t1, 0
-  li $t2, 393 
-  li $t3, 104 
-  la $t4, Instructions #Battleforts
-  addi $sp, $sp, -20
-  sw $t0, 0($sp)
-  sw $t1, 4($sp)
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
+
+	li $t0, 40																		  # x position
+	li $t1, -175																		# y position
+	li $t2, 393 																		# width
+	li $t3, 104 																		# height
+	la $t4, Instructions 														# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
 
 
+#
+# Desc:
+# 	Check user input for instruction menu
+# Parameters:
+#		none
+# Returns:
+#		none
+#
+main_instructions_userInput:												
+  																								# Wait for user to press a key
+	lw $t0, 0xFFFF0000															# Retrieve transmitter control ready bit
+  blez $t0, main_instructions_userInput						# Check if a key was pressed
+
+  jal getInput																		# Read keyboard input
+  or $t6, $zero, $v0															# Backup direction from keyboard
+
+  beq $t6, 0x02000000, main_clearInstructions			# Clear instructions if user pressed 'f' 
+  beq $t6, 0x03000000, main_clearInstructions			# Clear instructions if user pressed 'j' 
+  beq $t6, 0x04000000, main_exit									# Exit if user pressed 'f'
+
+	j main_instructions_userInput										# Loop until valid key is pressed 
+
+ 
+#
+# Desc:
+#		Clear instruction menu
+#	Parameters:
+#		none
+# Returns:
+#		none
+#
+main_clearInstructions:
+
+	li $t0, 40																		  # x position
+	li $t1, -175																		# y position
+	li $t2, 393 																		# width
+	li $t3, 104 																		# height
+	la $t4, clear 																	# bitmap label
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+	sw $t4, 16($sp)
+	jal drawBitmap
+	
+	j main_generateUnits														# Jumping becuase user has already inputed a key
+
+
+#	
+# Desc:
+# 	Wait for user to press a key to generate a unit
+# Parameters:
+#		none
+# Returns:
+#		none
+#
+main_generateUnits_userInput:
+																								  # Wait for user to press a key
+	lw $t0, 0xFFFF0000															# Retrieve transmitter control ready bit
+  blez $t0, main_generateUnits_userInput					# Check if a key was pressed
+
+
+#
+# Desc:
+# 	Get keyboard input to determine unit type
+# Parameters:
+#		none
+# Returns:
+#		none
+#
 main_generateUnits:
-  jal getInput
-  nop
-  or $t6, $zero, $v0  # Backup direction from keyboard
+	jal getInput																		# Read keyboard input
+	or $t6, $zero, $v0															# Backup direction from keyboard
+	
+	beq $t6, 0x04000000, main_exit									# Exit if user pressed 'x'
 
-  beq $t6, 0x04000000, main_exit
-  nop
 
+#
+# Desc:
+# 	Generate Paladin if 'f' was pressed
+# Parameters:
+#		none
+# Returns:
+#		none
+#
 main_generateUnitsLeft:
   bne $t6, 0x02000000, main_generateUnitsRight
   nop
@@ -82,6 +200,14 @@ main_generateUnitsLeft:
   jal store_unit
 
 
+#
+# Desc:
+# 	Generate Mongol if 'j' was pressed
+# Parameters:
+#		none
+# Returns:
+#		none
+#
 main_generateUnitsRight:
   bne $t6, 0x03000000, main_done
   nop
@@ -91,14 +217,32 @@ main_generateUnitsRight:
   jal store_unit
 
 
+#
+# Desc:
+# 	Render unit and return to wait for user input
+# Parameters:
+#		none
+# Returns:
+#		none
+#
 main_done:
   jal render
-  b main_generateUnits
+  b main_generateUnits_userInput
 
 
+#
+# Desc:
+# 	Exit Program
+# Parameters:
+#		none
+# Returns:
+#		none
+#
 main_exit:
   li $v0, 10
   syscall
+
+
 
 
 #
@@ -173,7 +317,7 @@ store_unit:
   move $t1, $a0
   sw $t1, ($t0)
   addi $t0, $t0, 4
-  li $t1, 450
+  li $t1, 440
   sw $t1, ($t0)
   addi $t0, $t0, 4
   li $t1, 50
@@ -186,96 +330,94 @@ store_unit:
   jr $ra
 
 
-mongolWalk:
-  li $t0, 450 
-  li $t1, 50
-  sw $t0, 0($sp)
-  sw $t1, 4($sp)
-
-  li $t2, 86
-  li $t3, 107
-  la $t4, MongolWalk1
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
-
-  li $t2, 86
-  li $t3, 107
-  la $t4, MongolWalk2
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
-
-  li $t2, 86
-  li $t3, 107
-  la $t4, MongolWalk3
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
-
-  li $t2, 86
-  li $t3, 107
-  la $t4, MongolWalk4
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
-
-  j main_generateUnits
-  nop
-
-
 paladinWalk:
-  li $t0, 0 
-  li $t1, 50 
-  sw $t0, 0($sp)
-  sw $t1, 4($sp)
+	li $t0, -50			# x position
+	li $t1, 50			# y position
+	li $t2, 86 			# width
+	li $t3, 107 		#height
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
 
-  li $t2, 86
-  li $t3, 107
-  la $t4, PaladinWalk1
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
+	la $t4, PaladinWalk1
+	sw $t4, 16($sp)
+	jal drawBitmap
 
-  li $t2, 86
-  li $t3, 107
-  la $t4, PaladinWalk2
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
 
-  li $t2, 86
-  li $t3, 107
-  la $t4, PaladinWalk3
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
+	la $t4, PaladinWalk2
+	sw $t4, 16($sp)
+	jal drawBitmap
 
-  li $t2, 86
-  li $t3, 107
-  la $t4, PaladinWalk4
-  sw $t2, 8($sp)
-  sw $t3, 12($sp)
-  sw $t4, 16($sp)
-  jal drawBitmap
-  nop
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
 
-  j main_generateUnits
-  nop
+	la $t4, PaladinWalk3
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, PaladinWalk4
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	j main_generateUnits_userInput	
+
+
+mongolWalk:
+	li $t0, 440
+	li $t1, 50  
+	li $t2, 86 
+	li $t3, 107 
+	sw $t0, 0($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+	sw $t3, 12($sp)
+
+	la $t4, MongolWalk1
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, MongolWalk2
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, MongolWalk3
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, MongolWalk4
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	la $t4, clear
+	sw $t4, 16($sp)
+	jal drawBitmap
+
+	j main_generateUnits_userInput	
 
 
 #
@@ -365,21 +507,12 @@ drawBitmap:
 
 
 #
-#  Parameters:
-#    none
-#
-sleep:
-  ori $v0, $zero, 32    # Syscall sleep
-  ori $a0, $zero, 60    # For this many miliseconds
-  syscall
-  jr $ra        # Return
-  nop
-
-#
-#  Parameters:
-#    none
-#  Returns:
-#   v0 = player(side) OR exit program
+# Desc:
+#		Reads ASCII code from Receiver Data register to get key input by user
+# Parameters:
+#		none
+# Returns:
+#   v0 = keyboard input
 #
 getInput:
   lw $t0, 0xFFFF0004    # Load input value
