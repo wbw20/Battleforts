@@ -5,7 +5,6 @@ height:         .word 512
 width:          .word 512
 word_size:      .word 4
 hot_pink:       .word 0xff0080
-clear:					.word 0X000000
 
 display:        .space 0x4000
 data_pointer:   .word 0x103df050
@@ -74,7 +73,7 @@ main_clearMenu:
 	li $t1, -175																		# y position
 	li $t2, 327 																		# width
 	li $t3, 95 																			# height
-	la $t4, clear																		# bitmap label
+	la $t4, hot_pink																# bitmap label
 	sw $t0, 0($sp)
 	sw $t1, 4($sp)
 	sw $t2, 8($sp)
@@ -128,7 +127,7 @@ main_instructions_userInput:
 
 	j main_instructions_userInput										# Loop until valid key is pressed 
 
- 
+
 #
 # Desc:
 #		Clear instruction menu
@@ -143,7 +142,7 @@ main_clearInstructions:
 	li $t1, -175																		# y position
 	li $t2, 393 																		# width
 	li $t3, 104 																		# height
-	la $t4, clear 																	# bitmap label
+	la $t4, hot_pink 																# bitmap label
 	sw $t0, 0($sp)
 	sw $t1, 4($sp)
 	sw $t2, 8($sp)
@@ -396,7 +395,7 @@ paladinWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -404,7 +403,7 @@ paladinWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -412,7 +411,7 @@ paladinWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -420,7 +419,7 @@ paladinWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -441,7 +440,7 @@ mongolWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -449,7 +448,7 @@ mongolWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -457,7 +456,7 @@ mongolWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -465,7 +464,7 @@ mongolWalk:
 	sw $t4, 16($sp)
 	jal drawBitmap
 
-	la $t4, clear
+	la $t4, hot_pink
 	sw $t4, 16($sp)
 	jal drawBitmap
 
@@ -495,6 +494,8 @@ drawPixel:
 
   # total offset
   add $t2, $t2, $t3
+
+  lw $t5, display($t2)
 
   # draw
   sw $a2, display($t2)
