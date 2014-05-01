@@ -217,7 +217,60 @@ main_generateUnitsRight:
   la $a0, MongolWalk1
   li $a1, 440
   jal store_unit
+	
 
+main_movement:
+	jal render									# render generate units
+	
+	lw $t0, data          			# bottom of unit stack
+	lw $t1, ($t0)								# get unit bitmap
+	
+	la $t2, MongolWalk1					# get MongolWalk1 bitmap 
+	beq $t1, $t2, mongolWalk2		# compare
+	
+	la $t2, MongolWalk2					# etc..
+	beq $t1, $t2, mongolWalk3
+	
+	la $t2, MongolWalk3
+	beq $t1, $t2, mongolWalk4
+	
+	la $t2, MongolWalk4
+	beq $t1, $t2, mongolWalk1
+	
+	b main_done
+	
+	
+	
+	mongolWalk2:
+		
+		la $a0, MongolWalk2
+		li $a1, 400
+		jal store_unit
+		
+		
+	mongolWalk3:
+		
+			la $a0, MongolWalk3
+			li $a1, 360
+			jal store_unit
+			
+	mongolWalk4:
+		
+			la $a0, MongolWalk4
+			li $a1, 320
+			jal store_unit
+			
+			
+	mongolWalk1:
+
+			la $a0, MongolWalk1
+			li $a1, 290
+			jal store_unit
+			
+			
+
+	
+	
 
 #
 # Desc:
@@ -331,96 +384,6 @@ store_unit:
   addi $t0, $t0, 4
   sw $t0, data_pointer
   jr $ra
-
-
-paladinWalk:
-	li $t0, -50			# x position
-	li $t1, 50			# y position
-	li $t2, 86 			# width
-	li $t3, 107 		#height
-	sw $t0, 0($sp)
-	sw $t1, 4($sp)
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-
-	la $t4, PaladinWalk1
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, PaladinWalk2
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, PaladinWalk3
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, PaladinWalk4
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	j main_generateUnits_userInput	
-
-
-mongolWalk:
-	li $t0, 440
-	li $t1, 50  
-	li $t2, 86 
-	li $t3, 107 
-	sw $t0, 0($sp)
-	sw $t1, 4($sp)
-	sw $t2, 8($sp)
-	sw $t3, 12($sp)
-
-	la $t4, MongolWalk1
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, MongolWalk2
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, MongolWalk3
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, MongolWalk4
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	la $t4, clear
-	sw $t4, 16($sp)
-	jal drawBitmap
-
-	j main_generateUnits_userInput	
 
 
 #
