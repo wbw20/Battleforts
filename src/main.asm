@@ -197,6 +197,7 @@ main_generateUnitsLeft:
 
   # store a paladin
   la $a0, PaladinWalk1
+  li $a1, -50
   jal store_unit
 
 
@@ -214,6 +215,7 @@ main_generateUnitsRight:
 
   # store a mongol
   la $a0, MongolWalk1
+  li $a1, 440
   jal store_unit
 
 
