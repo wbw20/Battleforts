@@ -73,13 +73,11 @@ main_clearMenu:
 	li $t1, -175																		# y position
 	li $t2, 327 																		# width
 	li $t3, 95 																			# height
-	la $t4, hot_pink																# bitmap label
 	sw $t0, 0($sp)
 	sw $t1, 4($sp)
 	sw $t2, 8($sp)
 	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap	
+	jal clearBitmap
 
 
 #
@@ -142,13 +140,11 @@ main_clearInstructions:
 	li $t1, -175																		# y position
 	li $t2, 393 																		# width
 	li $t3, 104 																		# height
-	la $t4, hot_pink 																# bitmap label
 	sw $t0, 0($sp)
 	sw $t1, 4($sp)
 	sw $t2, 8($sp)
 	sw $t3, 12($sp)
-	sw $t4, 16($sp)
-	jal drawBitmap
+	jal clearBitmap
 	
 	j main_generateUnits														# Jumping becuase user has already inputed a key
 
@@ -556,6 +552,53 @@ drawBitmap:
     j db_row
 
   db_return:
+    jr $s7 # return
+
+#
+#  Parameters:
+#    0($sp) --> x coordinate
+#    4($sp) --> y coordinate
+#    8($sp) --> width
+#   12($sp) --> height
+#
+clearBitmap:
+  lw $s0, 0($sp)
+  lw $s1, 4($sp)
+  lw $s2, 8($sp)
+  lw $s3, 12($sp)
+
+  # x counter
+  li $s5, 0
+
+  # jal paints over $ra
+  move $s7, $ra
+
+  cb_row:
+    # at the end of this row?
+    beq $s2, $s5 cb_return
+
+    # y counter
+    li $s6, 0
+
+    lw $s3, 12($sp)
+    add $a0, $s0, $s5 # x coordinate
+
+    cb_column:
+      # at the end of this column?
+      beq $s3, $s6, cb_end_row
+      add $a1, $s1, $s6 # y coordinate
+
+      lw $a2, hot_pink # load color
+      jal drawPixel
+
+      addi $s6, $s6, 1
+      j cb_column
+
+  cb_end_row:
+    addi $s5, $s5, 1
+    j cb_row
+
+  cb_return:
     jr $s7 # return
 
 
