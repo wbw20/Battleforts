@@ -111,18 +111,19 @@ render:
   lw $t0, data          # bottom of unit stack
   lw $t1, data_pointer  # top of unit stack
 
-  addi $sp, $sp, -12
+  addi $sp, $sp, -16
   sw $ra, 0($sp)    # remember return address
   sw $t0, 4($sp)    # remember bottom
   sw $t1, 8($sp)    # remember top
-  addi $sp, $sp, 12
+  sw $t0, 12($sp)    # remember preserved bottom
+  addi $sp, $sp, 16
 
   read_unit:
     # retrive unit stack
-    addi $sp, $sp, -12
+    addi $sp, $sp, -16
     lw $t0, 4($sp)    # bottom
     lw $t1, 8($sp)    # top
-    addi $sp, $sp, 12
+    addi $sp, $sp, 16
 
     beq $t0, $t1, r_return # no more units
 
@@ -143,16 +144,20 @@ render:
     jal drawBitmap
 
     # update bottom pointer
-    addi $sp, $sp, -12
-    addi $t0, $t0, 16
-    sw $t0, 4($sp)
-    addi $sp, $sp, 12
+    addi $sp, $sp, -16
+    lw $t0, 4($sp)      # get bottom
+    addi $t0, $t0, 16   # increment bottom
+    sw $t0, 4($sp)      # store it back
+    addi $sp, $sp, 16
     j read_unit
 
   r_return:
-    addi $sp, $sp, -12
+    addi $sp, $sp, -16
+    lw $t0, 12($sp)
+    lw $t1, data
+    sw $t0, ($t1)  # replace the bottom of the unit stack
     lw $ra, ($sp)
-    addi $sp, $sp, 12
+    addi $sp, $sp, 16
     jr $ra
 
 
