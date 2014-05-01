@@ -219,6 +219,55 @@ main_generateUnitsRight:
   jal store_unit
 
 
+main_movement:
+	jal render									# render generate units
+
+	lw $t0, data          			# bottom of unit stack
+	lw $t1, ($t0)								# get unit bitmap
+
+	la $t2, MongolWalk1					# get MongolWalk1 bitmap 
+	beq $t1, $t2, mongolWalk2		# compare
+
+	la $t2, MongolWalk2					# etc..
+	beq $t1, $t2, mongolWalk3
+
+	la $t2, MongolWalk3
+	beq $t1, $t2, mongolWalk4
+
+	la $t2, MongolWalk4
+	beq $t1, $t2, mongolWalk1
+
+	b main_done
+
+
+
+	mongolWalk2:
+	
+		la $a0, MongolWalk2
+		li $a1, 400
+		jal store_unit
+	
+	
+	mongolWalk3:
+	
+			la $a0, MongolWalk3
+			li $a1, 360
+			jal store_unit
+		
+	mongolWalk4:
+	
+			la $a0, MongolWalk4
+			li $a1, 320
+			jal store_unit
+		
+		
+	mongolWalk1:
+
+			la $a0, MongolWalk1
+			li $a1, 290
+			jal store_unit
+		
+	
 #
 # Desc:
 # 	Render unit and return to wait for user input
