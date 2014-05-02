@@ -44,7 +44,7 @@ def prepare_battleforts():
 
     all_pixels = bmp_pixels.values()
     total_number_of_pixels = len(list(itertools.chain(*all_pixels)))
-    #print "Pixel Count: {}".format(total_number_of_pixels)
+    print "Pixel Count: {}".format(total_number_of_pixels)
     data_file_length = len(open('built/pixels.txt', 'r').read())
     #print "Pixel Data File Size: {} characters".format(data_file_length)
     #print "Number of bytes necessary for buffer: {}".format(data_file_length*4)

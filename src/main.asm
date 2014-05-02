@@ -10,6 +10,7 @@ display:        .space 0x4000
 data_pointer:   .word 0x103df050
 data:           .word 0x103df050
 new_line:       .ascii "\n"
+no_black:       .word 1234
 
 
 .text
@@ -309,7 +310,7 @@ render:
   addi $sp, $sp, 16
 
   read_unit:
-    # retrive unit stack
+    # retrieve unit stack
     addi $sp, $sp, -16
     lw $t0, 4($sp)    # bottom
     lw $t1, 8($sp)    # top
@@ -324,6 +325,7 @@ render:
 
     li $t6, 86
     li $t7, 107
+    lw $t8, no_black
 
     # do the drawing
     sw $t3, ($sp)     # x position
@@ -331,6 +333,7 @@ render:
     sw $t6, 8($sp)    # width
     sw $t7, 12($sp)   # height
     sw $t2, 16($sp)   # bitmap address
+    sw $t8, 20($sp)   # do not use black
     jal drawBitmap
 
     # update bottom pointer
@@ -506,13 +509,14 @@ drawPixel:
 #    8($sp) --> width
 #   12($sp) --> height
 #   16($sp) --> address of bitmap pixel colors
-#
+#   20($sp) --> use black?
 drawBitmap:
   lw $s0, 0($sp)
   lw $s1, 4($sp)
   lw $s2, 8($sp)
   lw $s3, 12($sp)
   lw $s4, 16($sp)
+  lw $t9, 20($sp)
 
   # x counter
   li $s5, 0
@@ -521,7 +525,7 @@ drawBitmap:
   move $s7, $ra
 
   db_row:
-    # at the end of this row?
+    # at the end of this row
     beq $s2, $s5 db_return
 
     # y counter
@@ -531,7 +535,7 @@ drawBitmap:
     add $a0, $s0, $s5 # x coordinate
 
     db_column:
-      # at the end of this column?
+      # at the end of this column
       beq $s3, $s6, db_end_row
       add $a1, $s1, $s6 # y coordinate
 
@@ -539,6 +543,9 @@ drawBitmap:
 
       lw $t0, hot_pink
       beq $a2, $t0, db_skip # skip pink pixel
+      lw $t0, no_black
+      add $t0, $t0, $a2
+      beq $t9, $t0, db_skip
       jal drawPixel
       db_skip:
 
