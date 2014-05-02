@@ -1,0 +1,13 @@
+BATTLEFORTS
+
+to run, double click on Mars.jar
+
+then go to tools --> Bitmap Display
+then go to tools --> Keyboard and Display Simulator
+then go to file --> open --> src/main_complete.asm
+
+then hit 'connect to MIPS' on both the bitmap and keyboard tools
+then simply assemble and run
+
+enjoy!
+
